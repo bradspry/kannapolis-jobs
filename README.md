@@ -1,4 +1,6 @@
-# Kannapolis Job Pipeline
+# kannapolis-jobs
+
+*by Brad Spry, Kannapolitan*
 
 A command-line tool that scrapes job listings from employers, schools, and
 government sites in and around Kannapolis, NC, and formats them into
