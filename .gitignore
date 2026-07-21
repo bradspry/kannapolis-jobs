@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Local tooling
+.claude/
+
+# Generated output
+jobs_*.txt
+*-jobs_*.txt
