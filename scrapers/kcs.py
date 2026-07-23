@@ -2,13 +2,28 @@
 
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
 
+import requests
 from playwright.sync_api import sync_playwright, Frame
 
 from .base import BaseScraper, Job
 
 LISTING_URL = "https://www.applitrack.com/kannapolis/onlineapp/default.aspx?all=1"
 DETAIL_BASE = "https://www.applitrack.com/kannapolis/onlineapp/default.aspx"
+
+# The listing page can still show jobs whose detail page was already closed;
+# AppliTrack renders this text instead of the posting when that happens.
+UNAVAILABLE_MARKER = "this vacancy is not available"
+
+
+def _is_live(url: str) -> bool:
+    """Check a detail page still has a posting behind it."""
+    try:
+        resp = requests.get(url, timeout=15)
+        return UNAVAILABLE_MARKER not in resp.text.lower()
+    except requests.RequestException:
+        return True  # fail open — don't drop a job over a network hiccup
 
 
 def _clean(text: str) -> str:
@@ -124,7 +139,19 @@ class KCSScraper(BaseScraper):
                 return []
 
             candidates = _parse_listing(frame)
-            print(f"  Found {len(candidates)} job(s).")
+            print(f"  Found {len(candidates)} job(s). Verifying postings are still live...")
+
+            # Detail pages checked concurrently — sequential requests here noticeably slow the scrape.
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                live_flags = list(executor.map(lambda j: _is_live(j["url"]), candidates))
+
+            dropped = [j for j, live in zip(candidates, live_flags) if not live]
+            candidates = [j for j, live in zip(candidates, live_flags) if live]
+
+            if dropped:
+                print(f"  Dropped {len(dropped)} closed/unavailable listing(s):")
+                for job in dropped:
+                    print(f"    (removed) {job['title']}")
 
             for job in candidates:
                 print(f"  {job['title']}  |  {job['location'] or '(no location)'}")
