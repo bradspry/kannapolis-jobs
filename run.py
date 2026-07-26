@@ -36,9 +36,10 @@ from scrapers.standardprocess import StandardProcessScraper
 from scrapers.lilly import LillyScraper
 from scrapers.cabarrus import CabarrusCountyScraper
 from scrapers.rowancounty import RowanCountyGovernmentScraper
+from scrapers.speedwaymotorsports import SpeedwayMotorsportsScraper
 from scrapers.base import Job
 
-ALL_SCRAPERS = [IndeedScraper(), IndeedRemoteScraper(), DHLScraper(), KCSScraper(), CityOfKannapolisScraper(), CFASupplyScraper(), MomentecScraper(), GFSScraper(), ShoeShowScraper(), UNCCScraper(), RCCCScraper(), UNCScraper(), NCStateScraper(), AppStateScraper(), UNCGScraper(), StandardProcessScraper(), LillyScraper(), CabarrusCountyScraper(), RowanCountyGovernmentScraper()]
+ALL_SCRAPERS = [IndeedScraper(), IndeedRemoteScraper(), DHLScraper(), KCSScraper(), CityOfKannapolisScraper(), CFASupplyScraper(), MomentecScraper(), GFSScraper(), ShoeShowScraper(), UNCCScraper(), RCCCScraper(), UNCScraper(), NCStateScraper(), AppStateScraper(), UNCGScraper(), StandardProcessScraper(), LillyScraper(), CabarrusCountyScraper(), RowanCountyGovernmentScraper(), SpeedwayMotorsportsScraper()]
 
 MAX_LINES = 99
 SEP  = "=" * 10
