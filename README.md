@@ -45,9 +45,12 @@ holds at most 99 lines to fit within Facebook's length limits.
 | City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
 | Cabarrus County Government | `cabarrus` | Playwright (GovernmentJobs/NEOGOV, paginated) | No |
 | Rowan County Government | `rowancounty` | Tyler Portico public API | Yes |
+| Speedway Motorsports | `speedway` | ADP WorkforceNow public API, filtered to Concord/Harrisburg | No |
+| Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
 | Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
 | Momentec | `momentec` | Playwright (Paycom) | No |
 | Gordon Food Service | `gfs` | Playwright (Workday) | No |
+| Monarch | `monarch` | Workday CXS public API, filtered to Concord/Kannapolis | Yes |
 | Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
 | Standard Process | `standardprocess` | UltiPro job board API | Yes |
 | Lilly | `lilly` | jobsyn.org search API | No |
