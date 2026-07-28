@@ -60,6 +60,7 @@ holds at most 99 lines to fit within Facebook's length limits.
 | Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
 | Speedway Motorsports | `speedway` | ADP WorkforceNow public API, filtered to Concord/Harrisburg | No |
 | Standard Process | `standardprocess` | UltiPro job board API | Yes |
+| Sysco | `sysco` | TalentBrew career site (radius search, filtered to Concord) | No |
 | UNC | `unc` | Atom feed, filtered to Kannapolis-area postings | Yes |
 | UNC Charlotte | `uncc` | Atom feed | Yes |
 | UNC Greensboro | `uncg` | Atom feed, filtered to Kannapolis-area postings | Yes |
