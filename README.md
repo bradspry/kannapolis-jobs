@@ -38,28 +38,28 @@ holds at most 99 lines to fit within Facebook's length limits.
 
 | Source | `--modules` slug | Mechanism | Keyword filter |
 |---|---|---|---|
-| Indeed | `indeed` | [jobspy](https://github.com/speedyapply/JobSpy) | Yes |
-| Indeed (Remote/Hybrid) | `indeedremote` | jobspy, filtered to remote/hybrid postings | Yes |
-| DHL Careers | `dhl` | Playwright (search + per-job address check) | No |
-| Kannapolis City Schools | `kcs` | Playwright (AppliTrack/Frontline) | No |
-| City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
+| AppState | `appstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
 | Cabarrus County Government | `cabarrus` | Playwright (GovernmentJobs/NEOGOV, paginated) | No |
-| Rowan County Government | `rowancounty` | Tyler Portico public API | Yes |
-| Speedway Motorsports | `speedway` | ADP WorkforceNow public API, filtered to Concord/Harrisburg | No |
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
 | Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
-| Momentec | `momentec` | Playwright (Paycom) | No |
+| City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
+| DHL Careers | `dhl` | Playwright (search + per-job address check) | No |
 | Gordon Food Service | `gfs` | Playwright (Workday) | No |
-| Monarch | `monarch` | Workday CXS public API, filtered to Concord/Kannapolis | Yes |
-| REBEL | `rebel` | BambooHR public careers API, filtered to Kannapolis | No |
-| Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
-| Standard Process | `standardprocess` | UltiPro job board API | Yes |
+| Indeed | `indeed` | [jobspy](https://github.com/speedyapply/JobSpy) | Yes |
+| Indeed (Remote/Hybrid) | `indeedremote` | jobspy, filtered to remote/hybrid postings | Yes |
+| Kannapolis City Schools | `kcs` | Playwright (AppliTrack/Frontline) | No |
 | Lilly | `lilly` | jobsyn.org search API | No |
-| UNC Charlotte | `uncc` | Atom feed | Yes |
-| RCCC | `rccc` | Atom feed | Yes |
-| UNC | `unc` | Atom feed, filtered to Kannapolis-area postings | Yes |
+| Momentec | `momentec` | Playwright (Paycom) | No |
+| Monarch | `monarch` | Workday CXS public API, filtered to Concord/Kannapolis | Yes |
 | NC State | `ncstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
-| AppState | `appstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
+| RCCC | `rccc` | Atom feed | Yes |
+| REBEL | `rebel` | BambooHR public careers API, filtered to Kannapolis (incl. remote) | No |
+| Rowan County Government | `rowancounty` | Tyler Portico public API | Yes |
+| Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
+| Speedway Motorsports | `speedway` | ADP WorkforceNow public API, filtered to Concord/Harrisburg | No |
+| Standard Process | `standardprocess` | UltiPro job board API | Yes |
+| UNC | `unc` | Atom feed, filtered to Kannapolis-area postings | Yes |
+| UNC Charlotte | `uncc` | Atom feed | Yes |
 | UNC Greensboro | `uncg` | Atom feed, filtered to Kannapolis-area postings | Yes |
 
 Modules that don't support a keyword filter always return their full current
