@@ -51,6 +51,7 @@ holds at most 99 lines to fit within Facebook's length limits.
 | Momentec | `momentec` | Playwright (Paycom) | No |
 | Gordon Food Service | `gfs` | Playwright (Workday) | No |
 | Monarch | `monarch` | Workday CXS public API, filtered to Concord/Kannapolis | Yes |
+| REBEL | `rebel` | BambooHR public careers API, filtered to Kannapolis | No |
 | Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
 | Standard Process | `standardprocess` | UltiPro job board API | Yes |
 | Lilly | `lilly` | jobsyn.org search API | No |
