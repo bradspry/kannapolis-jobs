@@ -20,13 +20,24 @@ def _clean(text: str) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
 
 
+def _is_remote(posting: dict) -> bool:
+    """No city/state set, but an ATS country is — BambooHR's shape for a remote/general opening."""
+    loc = posting.get("location") or {}
+    country = (posting.get("atsLocation") or {}).get("country")
+    return not loc.get("city") and not loc.get("state") and bool(country)
+
+
 def _location(posting: dict) -> str:
-    """City/state from the primary location, if set."""
+    """City/state from the primary location; falls back to "{Country} (Remote)" when unset."""
     loc = posting.get("location") or {}
     city, state = loc.get("city"), loc.get("state")
     if city and state:
         return f"{city}, {state}"
-    return city or state or ""
+    if city or state:
+        return city or state
+    if _is_remote(posting):
+        return f"{(posting.get('atsLocation') or {}).get('country')} (Remote)"
+    return ""
 
 
 class BambooHRScraper(BaseScraper):
@@ -35,6 +46,7 @@ class BambooHRScraper(BaseScraper):
     subdomain: str
     company: str
     target_cities: set[str] | None = None  # lowercased city names to keep; None keeps everything
+    include_remote: bool = False  # also keep listings with no city/state (e.g. "United States (Remote)")
 
     @property
     def name(self) -> str:
@@ -60,7 +72,11 @@ class BambooHRScraper(BaseScraper):
                 continue
 
             if self.target_cities is not None:
-                if (location.split(",")[0] if location else "").strip().lower() not in self.target_cities:
+                loc_obj = posting.get("location") or {}
+                city = (loc_obj.get("city") or "").strip().lower()
+                matches_city = city in self.target_cities
+                matches_remote = self.include_remote and _is_remote(posting)
+                if not (matches_city or matches_remote):
                     continue
 
             url = DETAIL_URL.format(subdomain=self.subdomain, job_id=job_id)
