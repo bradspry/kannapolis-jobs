@@ -41,6 +41,7 @@ holds at most 99 lines to fit within Facebook's length limits.
 | AppState | `appstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
 | Cabarrus County Government | `cabarrus` | Playwright (GovernmentJobs/NEOGOV, paginated) | No |
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
+| Chewy | `chewy` | Phenom People career site, embedded JSON (Salisbury, NC only) | No |
 | Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
 | City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
 | Corning | `corning` | SAP SuccessFactors career site, filtered to Concord, NC | Yes |
