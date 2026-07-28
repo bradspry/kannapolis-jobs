@@ -43,6 +43,7 @@ holds at most 99 lines to fit within Facebook's length limits.
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
 | Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
 | City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
+| Corning | `corning` | SAP SuccessFactors career site, filtered to Concord, NC | Yes |
 | DHL Careers | `dhl` | Playwright (search + per-job address check) | No |
 | Gordon Food Service | `gfs` | Playwright (Workday) | No |
 | Indeed | `indeed` | [jobspy](https://github.com/speedyapply/JobSpy) | Yes |
