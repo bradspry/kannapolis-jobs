@@ -10,4 +10,4 @@ class WestrockCoffeeScraper(ADPMyJobsScraper):
 
     @property
     def slug(self) -> str:
-        return "westrockcoffee"
+        return "westrock"

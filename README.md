@@ -65,7 +65,7 @@ holds at most 99 lines to fit within Facebook's length limits.
 | UNC | `unc` | Atom feed, filtered to Kannapolis-area postings | Yes |
 | UNC Charlotte | `uncc` | Atom feed | Yes |
 | UNC Greensboro | `uncg` | Atom feed, filtered to Kannapolis-area postings | Yes |
-| Westrock Coffee | `westrockcoffee` | ADP myjobs (Recruiting Cloud) public API, filtered to Concord | No |
+| Westrock Coffee | `westrock` | ADP myjobs (Recruiting Cloud) public API, filtered to Concord | No |
 
 Modules that don't support a keyword filter always return their full current
 listing set (they already scope to a specific employer/location).
