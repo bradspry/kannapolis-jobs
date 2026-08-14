@@ -8,6 +8,7 @@ Usage:
     python run.py warehouse                  # keyword search (modules that support it)
     python run.py --modules dhl              # run a specific module
     python run.py warehouse --modules indeed dhl kcs
+    python run.py --part-time                # only jobs whose title mentions "part time"
 
 Licensed under the GNU General Public License v3.0 — see LICENSE.
 """
@@ -52,6 +53,13 @@ ALL_SCRAPERS = [IndeedScraper(), IndeedRemoteScraper(), DHLScraper(), KCSScraper
 MAX_LINES = 99
 SEP  = "=" * 10
 DASH = "-" * 10
+
+PART_TIME_RE = re.compile(r"part[\s-]*time", re.IGNORECASE)
+
+
+def is_part_time(job: Job) -> bool:
+    """True if the job's title mentions 'part time' in any casing/spacing."""
+    return bool(PART_TIME_RE.search(job.title or ""))
 
 
 def build_posts(jobs: list[Job], label: str = "KANNAPOLIS") -> list[list[str]]:
@@ -117,6 +125,10 @@ def main() -> None:
         "--split", action="store_true",
         help="Write a separate file set per source instead of one combined output",
     )
+    parser.add_argument(
+        "--part-time", action="store_true", dest="part_time",
+        help="Only include jobs whose title mentions 'part time' (applies across all modules)",
+    )
     args = parser.parse_args()
 
     scrapers = ALL_SCRAPERS
@@ -140,6 +152,8 @@ def main() -> None:
         print(f"{'=' * 40}")
         try:
             jobs = scraper.fetch(keyword=args.keyword)
+            if args.part_time:
+                jobs = [j for j in jobs if is_part_time(j)]
             new_jobs = [j for j in jobs if j.url not in seen_urls]
             seen_urls.update(j.url for j in new_jobs)
             print(f"  {len(new_jobs)} unique job(s) added.")
@@ -148,7 +162,7 @@ def main() -> None:
                 new_jobs.sort(key=lambda j: j.title.lower())
                 label  = scraper.name.upper()
                 posts  = build_posts(new_jobs, label=label)
-                prefix = f"{scraper.slug}-jobs_{safe_kw}_{ts}"
+                prefix = f"{scraper.slug}-jobs_{safe_kw}_{ts}" + ("_parttime" if args.part_time else "")
                 write_posts(posts, prefix)
             else:
                 all_jobs.extend(new_jobs)
@@ -169,6 +183,7 @@ def main() -> None:
     all_jobs.sort(key=lambda j: (j.company.lower(), j.title.lower()))
     mod_tag = "_".join(m.lower() for m in args.modules) if args.modules else ""
     suffix  = f"_{mod_tag}" if mod_tag else ""
+    suffix += "_parttime" if args.part_time else ""
     label   = scrapers[0].name.upper() if len(scrapers) == 1 else "KANNAPOLIS"
     posts   = build_posts(all_jobs, label=label)
     write_posts(posts, f"jobs_{safe_kw}_{ts}{suffix}")

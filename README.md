@@ -28,11 +28,17 @@ python run.py warehouse                  # keyword search (modules that support 
 python run.py --modules dhl              # run a specific module
 python run.py warehouse --modules indeed dhl kcs
 python run.py --split                    # write a separate file set per source
+python run.py --part-time                # only jobs whose title mentions "part time"
 ```
 
 Results are deduplicated by URL, sorted by company then title, and written to
 `jobs_{keyword}_{timestamp}_part{N}.txt` in the current directory. Each file
 holds at most 99 lines to fit within Facebook's length limits.
+
+`--part-time` filters by job title (matching "part time", "part-time", or
+"parttime" in any casing/spacing) after fetching, so it applies uniformly
+across every module regardless of whether that module supports a keyword
+filter.
 
 ## Modules
 
