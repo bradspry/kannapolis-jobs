@@ -9,6 +9,7 @@ Usage:
     python run.py --modules dhl              # run a specific module
     python run.py warehouse --modules indeed dhl kcs
     python run.py --part-time                # only jobs whose title mentions "part time"
+    python run.py --title-match "mechanic|automotive|diesel"   # filter titles by regex
 
 Licensed under the GNU General Public License v3.0 — see LICENSE.
 """
@@ -57,9 +58,15 @@ DASH = "-" * 10
 PART_TIME_RE = re.compile(r"part[\s-]*time", re.IGNORECASE)
 
 
-def is_part_time(job: Job) -> bool:
-    """True if the job's title mentions 'part time' in any casing/spacing."""
-    return bool(PART_TIME_RE.search(job.title or ""))
+def title_matches(job: Job, patterns: list[re.Pattern]) -> bool:
+    """True if the job's title matches every supplied title filter."""
+    title = job.title or ""
+    return all(p.search(title) for p in patterns)
+
+
+def filename_tag(pattern: str) -> str:
+    """Condense a title-match pattern into a short filename-safe tag."""
+    return re.sub(r"[^\w]+", "_", pattern).strip("_").lower()[:40]
 
 
 def build_posts(jobs: list[Job], label: str = "KANNAPOLIS") -> list[list[str]]:
@@ -129,7 +136,25 @@ def main() -> None:
         "--part-time", action="store_true", dest="part_time",
         help="Only include jobs whose title mentions 'part time' (applies across all modules)",
     )
+    parser.add_argument(
+        "--title-match", metavar="REGEX", dest="title_match",
+        help="Only include jobs whose title matches this case-insensitive regex, e.g. "
+             "'mechanic|automotive|diesel' (applies across all modules)",
+    )
     args = parser.parse_args()
+
+    title_filters: list[re.Pattern] = []
+    tag_parts: list[str] = []
+    if args.part_time:
+        title_filters.append(PART_TIME_RE)
+        tag_parts.append("parttime")
+    if args.title_match:
+        try:
+            title_filters.append(re.compile(args.title_match, re.IGNORECASE))
+        except re.error as e:
+            sys.exit(f"Invalid --title-match regex {args.title_match!r}: {e}")
+        tag_parts.append(filename_tag(args.title_match))
+    filter_tag = "".join(f"_{t}" for t in tag_parts if t)
 
     scrapers = ALL_SCRAPERS
     if args.modules:
@@ -152,8 +177,8 @@ def main() -> None:
         print(f"{'=' * 40}")
         try:
             jobs = scraper.fetch(keyword=args.keyword)
-            if args.part_time:
-                jobs = [j for j in jobs if is_part_time(j)]
+            if title_filters:
+                jobs = [j for j in jobs if title_matches(j, title_filters)]
             new_jobs = [j for j in jobs if j.url not in seen_urls]
             seen_urls.update(j.url for j in new_jobs)
             print(f"  {len(new_jobs)} unique job(s) added.")
@@ -162,7 +187,7 @@ def main() -> None:
                 new_jobs.sort(key=lambda j: j.title.lower())
                 label  = scraper.name.upper()
                 posts  = build_posts(new_jobs, label=label)
-                prefix = f"{scraper.slug}-jobs_{safe_kw}_{ts}" + ("_parttime" if args.part_time else "")
+                prefix = f"{scraper.slug}-jobs_{safe_kw}_{ts}{filter_tag}"
                 write_posts(posts, prefix)
             else:
                 all_jobs.extend(new_jobs)
@@ -183,7 +208,7 @@ def main() -> None:
     all_jobs.sort(key=lambda j: (j.company.lower(), j.title.lower()))
     mod_tag = "_".join(m.lower() for m in args.modules) if args.modules else ""
     suffix  = f"_{mod_tag}" if mod_tag else ""
-    suffix += "_parttime" if args.part_time else ""
+    suffix += filter_tag
     label   = scrapers[0].name.upper() if len(scrapers) == 1 else "KANNAPOLIS"
     posts   = build_posts(all_jobs, label=label)
     write_posts(posts, f"jobs_{safe_kw}_{ts}{suffix}")

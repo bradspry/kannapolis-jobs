@@ -29,16 +29,41 @@ python run.py --modules dhl              # run a specific module
 python run.py warehouse --modules indeed dhl kcs
 python run.py --split                    # write a separate file set per source
 python run.py --part-time                # only jobs whose title mentions "part time"
+python run.py --title-match "mechanic|automotive|diesel"   # filter titles by regex
 ```
 
 Results are deduplicated by URL, sorted by company then title, and written to
-`jobs_{keyword}_{timestamp}_part{N}.txt` in the current directory. Each file
-holds at most 99 lines to fit within Facebook's length limits.
+the current directory. Each file holds at most 99 lines to fit within
+Facebook's length limits, so a run splits across as many `_part{N}` files as
+it needs.
+
+Filenames record what produced them, so runs stay distinguishable:
+
+```
+jobs_{keyword}_{timestamp}[_{modules}][_{filters}]_part{N}.txt   # combined (default)
+{slug}-jobs_{keyword}_{timestamp}[_{filters}]_part{N}.txt        # one set per source (--split)
+```
+
+`{keyword}` is `all` when no keyword is given, and the optional segments appear
+only when the matching flag is used:
+
+```
+jobs_all_20260821_100948_speedway_parttime_technician_part1.txt
+```
 
 `--part-time` filters by job title (matching "part time", "part-time", or
 "parttime" in any casing/spacing) after fetching, so it applies uniformly
 across every module regardless of whether that module supports a keyword
 filter.
+
+`--title-match REGEX` works the same way, taking any case-insensitive regex
+instead of a fixed pattern — useful for trades that span many job titles:
+
+```bash
+python run.py --title-match "mechanic|automotive|auto tech|diesel|collision|tire|service advisor"
+```
+
+Both flags can be combined, in which case a title must match all of them.
 
 ## Modules
 
