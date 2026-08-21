@@ -201,8 +201,15 @@ def main() -> None:
             jobs = scraper.fetch(keyword=args.keyword)
             if title_filters:
                 jobs = [j for j in jobs if title_matches(j, title_filters)]
-            new_jobs = [j for j in jobs if j.url not in seen_urls]
-            seen_urls.update(j.url for j in new_jobs)
+            new_jobs = []
+            for job in jobs:
+                # Record each URL as it is accepted, not in a batch afterwards,
+                # so repeats within this scraper's own results are caught too.
+                if job.url:
+                    if job.url in seen_urls:
+                        continue
+                    seen_urls.add(job.url)
+                new_jobs.append(job)
             print(f"  {len(new_jobs)} unique job(s) added.")
 
             if args.split and new_jobs:
