@@ -57,6 +57,26 @@ DASH = "-" * 10
 
 PART_TIME_RE = re.compile(r"part[\s-]*time", re.IGNORECASE)
 
+# A --title-match value made only of these characters is a plain term list,
+# not a regex, so it gets word boundaries applied automatically.
+PLAIN_TERMS_RE = re.compile(r"^[\w\s&/'|-]+$")
+
+
+def compile_title_pattern(pattern: str) -> re.Pattern:
+    """Compile a --title-match value into a case-insensitive pattern.
+
+    Plain words separated by "|" are matched as whole words (plus an optional
+    plural "s"), so "car" hits "Car Wash" and "Used Cars" but not "Carolina",
+    "Homecare", or "Care". Anything containing regex syntax is compiled
+    verbatim, so full regexes keep working unchanged.
+    """
+    if PLAIN_TERMS_RE.match(pattern):
+        terms = [t.strip() for t in pattern.split("|") if t.strip()]
+        if terms:
+            body = "|".join(re.escape(t) for t in terms)
+            return re.compile(rf"(?<!\w)(?:{body})s?(?!\w)", re.IGNORECASE)
+    return re.compile(pattern, re.IGNORECASE)
+
 
 def title_matches(job: Job, patterns: list[re.Pattern]) -> bool:
     """True if the job's title matches every supplied title filter."""
@@ -137,9 +157,11 @@ def main() -> None:
         help="Only include jobs whose title mentions 'part time' (applies across all modules)",
     )
     parser.add_argument(
-        "--title-match", metavar="REGEX", dest="title_match",
-        help="Only include jobs whose title matches this case-insensitive regex, e.g. "
-             "'mechanic|automotive|diesel' (applies across all modules)",
+        "--title-match", metavar="TERMS", dest="title_match",
+        help="Only include jobs whose title matches these terms, e.g. "
+             "'mechanic|automotive|car'. Plain words are matched as whole words, "
+             "so 'car' skips 'Carolina' and 'Care'. A value containing regex "
+             "syntax is used as a regex instead. Applies across all modules.",
     )
     args = parser.parse_args()
 
@@ -150,9 +172,9 @@ def main() -> None:
         tag_parts.append("parttime")
     if args.title_match:
         try:
-            title_filters.append(re.compile(args.title_match, re.IGNORECASE))
+            title_filters.append(compile_title_pattern(args.title_match))
         except re.error as e:
-            sys.exit(f"Invalid --title-match regex {args.title_match!r}: {e}")
+            sys.exit(f"Invalid --title-match pattern {args.title_match!r}: {e}")
         tag_parts.append(filename_tag(args.title_match))
     filter_tag = "".join(f"_{t}" for t in tag_parts if t)
 

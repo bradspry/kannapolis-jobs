@@ -56,11 +56,31 @@ jobs_all_20260821_100948_speedway_parttime_technician_part1.txt
 across every module regardless of whether that module supports a keyword
 filter.
 
-`--title-match REGEX` works the same way, taking any case-insensitive regex
-instead of a fixed pattern — useful for trades that span many job titles:
+`--title-match TERMS` works the same way but takes your own terms, which is
+useful for trades that span many job titles:
 
 ```bash
 python run.py --title-match "mechanic|automotive|auto tech|diesel|collision|tire|service advisor"
+```
+
+Plain words separated by `|` are matched as **whole words**, plus an optional
+plural `s`. This matters more than it sounds: a bare substring search for `car`
+also hits "Carolina", "Homecare", "Urgent Care", and "Carousel", which buries
+the real listings. Whole-word matching removes that noise without you having to
+write out the boundaries:
+
+| Term | Matches | Does not match |
+|---|---|---|
+| `car` | Car Wash Attendant, Used Cars Salesperson | Carolina, Homecare, Urgent Care, Carousel |
+| `mechanic` | Maintenance Mechanic II, Mechanics | Mechanical Designer |
+
+If the value contains regex syntax — `\`, `(`, `.`, `*`, `^`, `[` and so on — it
+is compiled as a regex verbatim and no boundaries are added, so full regexes
+still work:
+
+```bash
+python run.py --title-match "^(Senior )?Mechanic"     # anchored regex, used as-is
+python run.py --title-match "(?:car)"                 # force plain substring matching
 ```
 
 Both flags can be combined, in which case a title must match all of them.
