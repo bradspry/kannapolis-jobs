@@ -91,6 +91,7 @@ Both flags can be combined, in which case a title must match all of them.
 |---|---|---|---|
 | AppState | `appstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
 | Cabarrus County Government | `cabarrus` | Playwright (GovernmentJobs/NEOGOV, paginated) | No |
+| Cabarrus County Schools | `ccs` | SchoolSpring public jobs API, paginated | Yes |
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
 | Chewy | `chewy` | Phenom People career site, embedded JSON (Salisbury, NC only) | No |
 | Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
