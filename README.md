@@ -29,6 +29,8 @@ python run.py --modules dhl              # run a specific module
 python run.py warehouse --modules indeed dhl kcs
 python run.py --split                    # write a separate file set per source
 python run.py --part-time                # only jobs whose title mentions "part time"
+python run.py --evening                  # only evening/PM or second-shift jobs
+python run.py --part-time --evening      # part-time evening work only
 python run.py --title-match "mechanic|automotive|diesel"   # filter titles by regex
 ```
 
@@ -55,6 +57,33 @@ jobs_all_20260821_100948_speedway_parttime_technician_part1.txt
 "parttime" in any casing/spacing) after fetching, so it applies uniformly
 across every module regardless of whether that module supports a keyword
 filter.
+
+`--evening` filters the same way, for work that starts late in the day. It
+matches the forms employers actually use in a title:
+
+| Matches | Example title |
+|---|---|
+| evening, night(s), overnight, twilight | Part-Time Evening Custodian |
+| 2nd/second/3rd/third shift, swing shift, closing shift | Custodian 2nd Shift Hours |
+| after school | After School Program Aide |
+| a bare "PM" | Team Member (PM Shift) |
+| a clock time | Sales Associate 5:00pm-10:00pm |
+
+That last row is the reason `--evening` exists instead of just
+`--title-match "evening|pm|night"`. Whole-word matching cannot see the `PM` in
+`4PM-9PM`, because a digit is a word character and so no word boundary exists
+between `4` and `PM` — and a shift written as a clock range is one of the most
+common ways an evening job is advertised. `--evening` special-cases it.
+
+Deliberately excluded: bare "closing" and "closer", which match real-estate and
+sales titles ("Closing Coordinator", "Sales Closer") far more often than they
+match evening shifts. Only the unambiguous "closing shift" counts.
+
+Combine it with `--part-time` for part-time evening work specifically:
+
+```bash
+python run.py --part-time --evening
+```
 
 `--title-match TERMS` works the same way but takes your own terms, which is
 useful for trades that span many job titles:
@@ -83,7 +112,8 @@ python run.py --title-match "^(Senior )?Mechanic"     # anchored regex, used as-
 python run.py --title-match "(?:car)"                 # force plain substring matching
 ```
 
-Both flags can be combined, in which case a title must match all of them.
+All three title filters can be combined, in which case a title must match
+every one of them.
 
 ## Modules
 

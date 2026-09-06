@@ -58,6 +58,20 @@ DASH = "-" * 10
 
 PART_TIME_RE = re.compile(r"part[\s-]*time", re.IGNORECASE)
 
+# Evening/second-shift work, as employers actually write it in a title.
+# The final alternative catches clock times ("4PM-9PM", "5:00pm"), which the
+# leading word-boundary alternative cannot: a digit is a word character, so
+# "\b" refuses to match between "4" and "PM".
+EVENING_RE = re.compile(
+    r"(?<!\w)(?:evenings?|nights?|overnight|twilight"
+    r"|swing\s*shift|closing\s*shift"
+    r"|(?:2nd|second|3rd|third)\s*shift"
+    r"|after[\s-]*school"
+    r"|pm)(?!\w)"
+    r"|\d\s*(?::\d{2})?\s*pm(?!\w)",
+    re.IGNORECASE,
+)
+
 # A --title-match value made only of these characters is a plain term list,
 # not a regex, so it gets word boundaries applied automatically.
 PLAIN_TERMS_RE = re.compile(r"^[\w\s&/'|-]+$")
@@ -158,6 +172,11 @@ def main() -> None:
         help="Only include jobs whose title mentions 'part time' (applies across all modules)",
     )
     parser.add_argument(
+        "--evening", action="store_true",
+        help="Only include jobs whose title indicates an evening/PM or second shift "
+             "(applies across all modules)",
+    )
+    parser.add_argument(
         "--title-match", metavar="TERMS", dest="title_match",
         help="Only include jobs whose title matches these terms, e.g. "
              "'mechanic|automotive|car'. Plain words are matched as whole words, "
@@ -171,6 +190,9 @@ def main() -> None:
     if args.part_time:
         title_filters.append(PART_TIME_RE)
         tag_parts.append("parttime")
+    if args.evening:
+        title_filters.append(EVENING_RE)
+        tag_parts.append("evening")
     if args.title_match:
         try:
             title_filters.append(compile_title_pattern(args.title_match))
