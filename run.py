@@ -90,11 +90,13 @@ SCHOOL_BUS_RE = re.compile(
 )
 
 # Bus-adjacent roles that are not driving jobs, dropped from --school-bus:
-# "BUS MONITOR" rides along rather than drives, "BUS MECHANIC" is garage work,
-# and "EC Transportation Safety Assistant" is a bus attendant. Kannapolis's
-# plain "Transportation Assistant" is deliberately kept.
+# monitors and attendants ride along rather than drive, and mechanics are garage
+# work. Matched narrowly on the attendant job titles the districts actually use
+# ("Part-Time Transportation Assistant", "EC Transportation Safety Assistant")
+# rather than on "assistant" alone, which would take Rowan-Salisbury's
+# "TEACHER ASSISTANT/BUS DRIVER" — a driving job.
 SCHOOL_BUS_EXCLUDE_RE = re.compile(
-    r"(?<!\w)(?:monitors?|mechanics?|safety\s*assistants?)(?!\w)",
+    r"(?<!\w)(?:monitors?|mechanics?|(?:safety|transportation)\s*assistants?)(?!\w)",
     re.IGNORECASE,
 )
 

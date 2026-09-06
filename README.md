@@ -134,10 +134,13 @@ nothing matched. It counts by the employer name that appears in the output
 files, which is not always the module name — the `kcs` module posts its jobs
 as "Kannapolis City Schools".
 
-Non-driving roles are excluded: "BUS MONITOR" rides along rather than drives,
-"BUS MECHANIC" is garage work, and "EC Transportation Safety Assistant" is a bus
-attendant. Kannapolis's plain "Transportation Assistant" is kept. "Business" and
-"Drivers Ed Teacher" are left out too. Passing `--modules`
+Only driving jobs are returned. Monitors and attendants ride along rather than
+drive, and mechanics are garage work, so "BUS MONITOR", "BUS MECHANIC",
+"Part-Time Transportation Assistant" and "EC Transportation Safety Assistant"
+are all excluded. The exclusion names those attendant titles specifically rather
+than matching "assistant", which would take Rowan-Salisbury's "TEACHER
+ASSISTANT/BUS DRIVER" — a driving job. "Business" and "Drivers Ed Teacher" are
+left out too. Passing `--modules`
 explicitly overrides the narrowing, so `--school-bus --modules rss` searches
 only Rowan-Salisbury, and it composes with the other filters as usual:
 
