@@ -90,9 +90,13 @@ SCHOOL_BUS_RE = re.compile(
 )
 
 # Bus-adjacent roles that are not driving jobs, dropped from --school-bus:
-# "BUS MONITOR" rides along rather than drives, and "BUS MECHANIC" is garage
-# work. The ride-along Transportation Assistant roles are deliberately kept.
-SCHOOL_BUS_EXCLUDE_RE = re.compile(r"(?<!\w)(?:monitors?|mechanics?)(?!\w)", re.IGNORECASE)
+# "BUS MONITOR" rides along rather than drives, "BUS MECHANIC" is garage work,
+# and "EC Transportation Safety Assistant" is a bus attendant. Kannapolis's
+# plain "Transportation Assistant" is deliberately kept.
+SCHOOL_BUS_EXCLUDE_RE = re.compile(
+    r"(?<!\w)(?:monitors?|mechanics?|safety\s*assistants?)(?!\w)",
+    re.IGNORECASE,
+)
 
 # A --title-match value made only of these characters is a plain term list,
 # not a regex, so it gets word boundaries applied automatically.
