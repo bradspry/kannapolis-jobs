@@ -92,9 +92,14 @@ narrows the module set, to the three school districts:
 
 | District | Slug |
 |---|---|
-| Cabarrus County Schools | `ccs` |
 | Kannapolis City Schools | `kcs` |
+| Cabarrus County Schools | `ccs` |
 | Rowan-Salisbury Schools | `rss` |
+
+Results are reported in that order — Kannapolis first, then the two
+neighbouring county districts — rather than alphabetically by employer, which
+is how every other run is sorted. Jobs are sorted by title within each
+district.
 
 That narrowing is what lets the pattern be broad. A bare "bus" is unambiguous
 inside a school district, so the filter catches "BUS MONITOR" and "BUS MECHANIC"
@@ -121,11 +126,11 @@ which district is hiring without counting entries in the output files:
 ========================================
   SCHOOL BUS JOBS BY EMPLOYER
 ========================================
-  Cabarrus County Schools  26
-  Rowan-Salisbury Schools  15
-  Kannapolis City Schools  7
+  Kannapolis City Schools  5
+  Cabarrus County Schools  23
+  Rowan-Salisbury Schools  13
   -----------------------  --
-  TOTAL                    48
+  TOTAL                    41
 ========================================
 ```
 

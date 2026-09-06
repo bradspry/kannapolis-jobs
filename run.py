@@ -78,7 +78,9 @@ EVENING_RE = re.compile(
 # --school-bus narrows to these unless --modules says otherwise, which is what
 # lets SCHOOL_BUS_RE be broad: a bare "bus" is safe here, where board-wide it
 # would pull in restaurant "Bus Person" postings.
-SCHOOL_BUS_MODULES = ("ccs", "kcs", "rss")
+# Also the order results are reported in: Kannapolis first, since this is a
+# Kannapolis community group, then the two neighbouring county districts.
+SCHOOL_BUS_MODULES = ("kcs", "ccs", "rss")
 
 # Every shape the three districts currently use: "System-Wide Bus Driver",
 # "TEACHER ASSISTANT/BUS DRIVER", "Field Trip Bus Driver", "EC Lead Bus Driver",
@@ -134,7 +136,7 @@ def filename_tag(pattern: str) -> str:
     return re.sub(r"[^\w]+", "_", pattern).strip("_").lower()[:40]
 
 
-def print_employer_summary(counts: Counter) -> None:
+def print_employer_summary(counts: Counter, order: dict[str, int]) -> None:
     """Print a per-employer tally of the school bus jobs that survived filtering.
 
     Counts come from Job.company rather than the scraper name, because the two
@@ -149,7 +151,7 @@ def print_employer_summary(counts: Counter) -> None:
         print("  None found.")
     else:
         width = max(len(e) for e in counts)
-        for employer, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0].lower())):
+        for employer, n in sorted(counts.items(), key=lambda kv: order.get(kv[0], len(order))):
             print(f"  {employer.ljust(width)}  {n}")
         print(f"  {'-' * width}  {'-' * len(str(sum(counts.values())))}")
         print(f"  {'TOTAL'.ljust(width)}  {sum(counts.values())}")
@@ -267,7 +269,10 @@ def main() -> None:
 
     scrapers = ALL_SCRAPERS
     if args.school_bus and not args.modules:
-        scrapers = [s for s in ALL_SCRAPERS if s.slug in SCHOOL_BUS_MODULES]
+        # Ordered by SCHOOL_BUS_MODULES, not by position in ALL_SCRAPERS, so the
+        # reporting order is stated in one place rather than being incidental.
+        by_slug = {s.slug: s for s in ALL_SCRAPERS}
+        scrapers = [by_slug[m] for m in SCHOOL_BUS_MODULES if m in by_slug]
     if args.modules:
         names = {m.lower() for m in args.modules}
         scrapers = [s for s in ALL_SCRAPERS if s.slug in names]
@@ -280,6 +285,9 @@ def main() -> None:
     all_jobs: list[Job] = []
     seen_urls: set[str] = set()
     employer_counts: Counter[str] = Counter()
+    # Employer -> the order its module ran in, so --school-bus output follows
+    # SCHOOL_BUS_MODULES instead of falling back to alphabetical by company.
+    employer_order: dict[str, int] = {}
     ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_kw = re.sub(r"[^\w]+", "_", args.keyword).strip("_") if args.keyword else "all"
 
@@ -302,6 +310,8 @@ def main() -> None:
                 new_jobs.append(job)
             print(f"  {len(new_jobs)} unique job(s) added.")
             employer_counts.update(j.company or "Unknown" for j in new_jobs)
+            for job in new_jobs:
+                employer_order.setdefault(job.company or "Unknown", len(employer_order))
 
             if args.split and new_jobs:
                 new_jobs.sort(key=lambda j: j.title.lower())
@@ -316,7 +326,7 @@ def main() -> None:
 
     if args.split:
         if args.school_bus:
-            print_employer_summary(employer_counts)
+            print_employer_summary(employer_counts, employer_order)
         return
 
     print(f"\n{'=' * 40}")
@@ -326,10 +336,14 @@ def main() -> None:
     if not all_jobs:
         print("Nothing to write.")
         if args.school_bus:
-            print_employer_summary(employer_counts)
+            print_employer_summary(employer_counts, employer_order)
         return
 
-    all_jobs.sort(key=lambda j: (j.company.lower(), j.title.lower()))
+    if args.school_bus:
+        all_jobs.sort(key=lambda j: (employer_order.get(j.company, len(employer_order)),
+                                     j.title.lower()))
+    else:
+        all_jobs.sort(key=lambda j: (j.company.lower(), j.title.lower()))
     mod_tag = "_".join(m.lower() for m in args.modules) if args.modules else ""
     suffix  = f"_{mod_tag}" if mod_tag else ""
     suffix += filter_tag
@@ -338,7 +352,7 @@ def main() -> None:
     write_posts(posts, f"jobs_{safe_kw}_{ts}{suffix}")
 
     if args.school_bus:
-        print_employer_summary(employer_counts)
+        print_employer_summary(employer_counts, employer_order)
 
 
 if __name__ == "__main__":
