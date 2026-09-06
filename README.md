@@ -140,6 +140,7 @@ every one of them.
 | RCCC | `rccc` | Atom feed | Yes |
 | REBEL | `rebel` | BambooHR public careers API, filtered to Kannapolis (incl. remote) | No |
 | Rowan County Government | `rowancounty` | Tyler Portico public API | Yes |
+| Rowan-Salisbury Schools | `rss` | SchoolSpring public jobs API, paginated | Yes |
 | Shoe Show | `shoeshow` | Playwright (zip-radius search, paginated) | No |
 | Speedway Motorsports | `speedway` | ADP WorkforceNow public API, filtered to Concord/Harrisburg | No |
 | Standard Process | `standardprocess` | UltiPro job board API | Yes |
