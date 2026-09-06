@@ -73,6 +73,21 @@ EVENING_RE = re.compile(
     re.IGNORECASE,
 )
 
+# The school districts, which are the only employers that run school buses.
+# --school-bus narrows to these unless --modules says otherwise, which is what
+# lets SCHOOL_BUS_RE be broad: a bare "bus" is safe here, where board-wide it
+# would pull in restaurant "Bus Person" postings.
+SCHOOL_BUS_MODULES = ("ccs", "kcs", "rss")
+
+# Every shape the three districts currently use: "System-Wide Bus Driver",
+# "TEACHER ASSISTANT/BUS DRIVER", "Field Trip Bus Driver", "EC Lead Bus Driver",
+# "Part-Time Transportation Assistant (AM)", "EC Transportation Safety
+# Assistant", "Substitute Van Driver".
+SCHOOL_BUS_RE = re.compile(
+    r"(?<!\w)(?:bus(?:es|ing)?|van\s*driver|transportation|cdl)(?!\w)",
+    re.IGNORECASE,
+)
+
 # A --title-match value made only of these characters is a plain term list,
 # not a regex, so it gets word boundaries applied automatically.
 PLAIN_TERMS_RE = re.compile(r"^[\w\s&/'|-]+$")
@@ -178,6 +193,12 @@ def main() -> None:
              "(applies across all modules)",
     )
     parser.add_argument(
+        "--school-bus", action="store_true", dest="school_bus",
+        help="Only school bus jobs (drivers, transportation assistants). Narrows "
+             f"to the school districts {'/'.join(SCHOOL_BUS_MODULES)} unless "
+             "--modules is given",
+    )
+    parser.add_argument(
         "--title-match", metavar="TERMS", dest="title_match",
         help="Only include jobs whose title matches these terms, e.g. "
              "'mechanic|automotive|car'. Plain words are matched as whole words, "
@@ -194,6 +215,9 @@ def main() -> None:
     if args.evening:
         title_filters.append(EVENING_RE)
         tag_parts.append("evening")
+    if args.school_bus:
+        title_filters.append(SCHOOL_BUS_RE)
+        tag_parts.append("schoolbus")
     if args.title_match:
         try:
             title_filters.append(compile_title_pattern(args.title_match))
@@ -203,6 +227,8 @@ def main() -> None:
     filter_tag = "".join(f"_{t}" for t in tag_parts if t)
 
     scrapers = ALL_SCRAPERS
+    if args.school_bus and not args.modules:
+        scrapers = [s for s in ALL_SCRAPERS if s.slug in SCHOOL_BUS_MODULES]
     if args.modules:
         names = {m.lower() for m in args.modules}
         scrapers = [s for s in ALL_SCRAPERS if s.slug in names]
