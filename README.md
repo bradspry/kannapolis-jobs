@@ -31,6 +31,7 @@ python run.py --split                    # write a separate file set per source
 python run.py --part-time                # only jobs whose title mentions "part time"
 python run.py --evening                  # only evening/PM or second-shift jobs
 python run.py --part-time --evening      # part-time evening work only
+python run.py --school-bus               # school bus jobs across the three districts
 python run.py --title-match "mechanic|automotive|diesel"   # filter titles by regex
 ```
 
@@ -85,6 +86,42 @@ Combine it with `--part-time` for part-time evening work specifically:
 python run.py --part-time --evening
 ```
 
+`--school-bus` finds school bus work — drivers, monitors, mechanics, and the
+transportation assistants who ride along. Unlike the other filters it also
+narrows the module set, to the three school districts:
+
+| District | Slug |
+|---|---|
+| Cabarrus County Schools | `ccs` |
+| Kannapolis City Schools | `kcs` |
+| Rowan-Salisbury Schools | `rss` |
+
+That narrowing is what lets the pattern be broad. A bare "bus" is unambiguous
+inside a school district, so the filter catches "BUS MONITOR" and "BUS MECHANIC"
+without anyone having to think of those titles in advance — whereas board-wide
+it would pull in restaurant "Bus Person" postings. The districts each write the
+job differently, and all of these are matched:
+
+```
+System-Wide Bus Driver                        (Kannapolis)
+Field Trip Bus Driver                         (Kannapolis, Cabarrus)
+Part-Time Transportation Assistant (AM)       (Kannapolis)
+Bus Driver Cox Mill High School               (Cabarrus)
+EC Lead Bus Driver                            (Cabarrus)
+EC Transportation Safety Assistant            (Cabarrus)
+Substitute Van Driver                         (Cabarrus)
+TEACHER ASSISTANT/BUS DRIVER                  (Rowan-Salisbury)
+BUS MONITOR, BUS MECHANIC, VAN DRIVER         (Rowan-Salisbury)
+```
+
+"Business" and "Drivers Ed Teacher" are correctly left out. Passing `--modules`
+explicitly overrides the narrowing, so `--school-bus --modules rss` searches
+only Rowan-Salisbury, and it composes with the other filters as usual:
+
+```bash
+python run.py --school-bus --part-time   # part-time bus routes only
+```
+
 `--title-match TERMS` works the same way but takes your own terms, which is
 useful for trades that span many job titles:
 
@@ -112,7 +149,7 @@ python run.py --title-match "^(Senior )?Mechanic"     # anchored regex, used as-
 python run.py --title-match "(?:car)"                 # force plain substring matching
 ```
 
-All three title filters can be combined, in which case a title must match
+All four title filters can be combined, in which case a title must match
 every one of them.
 
 ## Modules
