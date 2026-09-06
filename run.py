@@ -17,6 +17,7 @@ Licensed under the GNU General Public License v3.0 — see LICENSE.
 import argparse
 import re
 import sys
+from collections import Counter
 from datetime import datetime
 
 from scrapers.indeed import IndeedScraper
@@ -118,6 +119,29 @@ def title_matches(job: Job, patterns: list[re.Pattern]) -> bool:
 def filename_tag(pattern: str) -> str:
     """Condense a title-match pattern into a short filename-safe tag."""
     return re.sub(r"[^\w]+", "_", pattern).strip("_").lower()[:40]
+
+
+def print_employer_summary(counts: Counter) -> None:
+    """Print a per-employer tally of the school bus jobs that survived filtering.
+
+    Counts come from Job.company rather than the scraper name, because the two
+    differ: the KCS module is named "KCS" but posts jobs as "Kannapolis City
+    Schools", which is the name that appears in the output files.
+    """
+    print(f"\n{'=' * 40}")
+    print("  SCHOOL BUS JOBS BY EMPLOYER")
+    print(f"{'=' * 40}")
+
+    if not counts:
+        print("  None found.")
+    else:
+        width = max(len(e) for e in counts)
+        for employer, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0].lower())):
+            print(f"  {employer.ljust(width)}  {n}")
+        print(f"  {'-' * width}  {'-' * len(str(sum(counts.values())))}")
+        print(f"  {'TOTAL'.ljust(width)}  {sum(counts.values())}")
+
+    print(f"{'=' * 40}")
 
 
 def build_posts(jobs: list[Job], label: str = "KANNAPOLIS") -> list[list[str]]:
@@ -240,6 +264,7 @@ def main() -> None:
 
     all_jobs: list[Job] = []
     seen_urls: set[str] = set()
+    employer_counts: Counter[str] = Counter()
     ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_kw = re.sub(r"[^\w]+", "_", args.keyword).strip("_") if args.keyword else "all"
 
@@ -261,6 +286,7 @@ def main() -> None:
                     seen_urls.add(job.url)
                 new_jobs.append(job)
             print(f"  {len(new_jobs)} unique job(s) added.")
+            employer_counts.update(j.company or "Unknown" for j in new_jobs)
 
             if args.split and new_jobs:
                 new_jobs.sort(key=lambda j: j.title.lower())
@@ -274,6 +300,8 @@ def main() -> None:
             print(f"  ERROR in {scraper.name}: {e}")
 
     if args.split:
+        if args.school_bus:
+            print_employer_summary(employer_counts)
         return
 
     print(f"\n{'=' * 40}")
@@ -282,6 +310,8 @@ def main() -> None:
 
     if not all_jobs:
         print("Nothing to write.")
+        if args.school_bus:
+            print_employer_summary(employer_counts)
         return
 
     all_jobs.sort(key=lambda j: (j.company.lower(), j.title.lower()))
@@ -291,6 +321,9 @@ def main() -> None:
     label   = scrapers[0].name.upper() if len(scrapers) == 1 else "KANNAPOLIS"
     posts   = build_posts(all_jobs, label=label)
     write_posts(posts, f"jobs_{safe_kw}_{ts}{suffix}")
+
+    if args.school_bus:
+        print_employer_summary(employer_counts)
 
 
 if __name__ == "__main__":

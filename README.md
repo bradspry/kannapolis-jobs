@@ -114,6 +114,26 @@ TEACHER ASSISTANT/BUS DRIVER                  (Rowan-Salisbury)
 BUS MONITOR, BUS MECHANIC, VAN DRIVER         (Rowan-Salisbury)
 ```
 
+A `--school-bus` run ends with a per-employer tally, so you can see at a glance
+which district is hiring without counting entries in the output files:
+
+```
+========================================
+  SCHOOL BUS JOBS BY EMPLOYER
+========================================
+  Cabarrus County Schools  26
+  Rowan-Salisbury Schools  15
+  Kannapolis City Schools  7
+  -----------------------  --
+  TOTAL                    48
+========================================
+```
+
+The tally is printed for `--split` runs too, and reads "None found." when
+nothing matched. It counts by the employer name that appears in the output
+files, which is not always the module name — the `kcs` module posts its jobs
+as "Kannapolis City Schools".
+
 "Business" and "Drivers Ed Teacher" are correctly left out. Passing `--modules`
 explicitly overrides the narrowing, so `--school-bus --modules rss` searches
 only Rowan-Salisbury, and it composes with the other filters as usual:
