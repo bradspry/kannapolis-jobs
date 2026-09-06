@@ -89,6 +89,11 @@ SCHOOL_BUS_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Bus-adjacent roles that are not driving jobs, dropped from --school-bus:
+# "BUS MONITOR" rides along rather than drives, and "BUS MECHANIC" is garage
+# work. The ride-along Transportation Assistant roles are deliberately kept.
+SCHOOL_BUS_EXCLUDE_RE = re.compile(r"(?<!\w)(?:monitors?|mechanics?)(?!\w)", re.IGNORECASE)
+
 # A --title-match value made only of these characters is a plain term list,
 # not a regex, so it gets word boundaries applied automatically.
 PLAIN_TERMS_RE = re.compile(r"^[\w\s&/'|-]+$")
@@ -110,9 +115,11 @@ def compile_title_pattern(pattern: str) -> re.Pattern:
     return re.compile(pattern, re.IGNORECASE)
 
 
-def title_matches(job: Job, patterns: list[re.Pattern]) -> bool:
-    """True if the job's title matches every supplied title filter."""
+def title_matches(job: Job, patterns: list[re.Pattern], excludes: list[re.Pattern] = []) -> bool:
+    """True if the job's title matches every filter and none of the exclusions."""
     title = job.title or ""
+    if any(p.search(title) for p in excludes):
+        return False
     return all(p.search(title) for p in patterns)
 
 
@@ -232,6 +239,7 @@ def main() -> None:
     args = parser.parse_args()
 
     title_filters: list[re.Pattern] = []
+    title_excludes: list[re.Pattern] = []
     tag_parts: list[str] = []
     if args.part_time:
         title_filters.append(PART_TIME_RE)
@@ -241,6 +249,7 @@ def main() -> None:
         tag_parts.append("evening")
     if args.school_bus:
         title_filters.append(SCHOOL_BUS_RE)
+        title_excludes.append(SCHOOL_BUS_EXCLUDE_RE)
         tag_parts.append("schoolbus")
     if args.title_match:
         try:
@@ -274,8 +283,8 @@ def main() -> None:
         print(f"{'=' * 40}")
         try:
             jobs = scraper.fetch(keyword=args.keyword)
-            if title_filters:
-                jobs = [j for j in jobs if title_matches(j, title_filters)]
+            if title_filters or title_excludes:
+                jobs = [j for j in jobs if title_matches(j, title_filters, title_excludes)]
             new_jobs = []
             for job in jobs:
                 # Record each URL as it is accepted, not in a batch afterwards,
