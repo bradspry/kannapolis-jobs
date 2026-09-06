@@ -143,20 +143,17 @@ def print_employer_summary(counts: Counter, order: dict[str, int]) -> None:
     differ: the KCS module is named "KCS" but posts jobs as "Kannapolis City
     Schools", which is the name that appears in the output files.
     """
-    print(f"\n{'=' * 40}")
-    print("  SCHOOL BUS JOBS BY EMPLOYER")
-    print(f"{'=' * 40}")
+    print("\nSchool Bus Driver Jobs \U0001F68C\n")
 
     if not counts:
-        print("  None found.")
-    else:
-        width = max(len(e) for e in counts)
-        for employer, n in sorted(counts.items(), key=lambda kv: order.get(kv[0], len(order))):
-            print(f"  {employer.ljust(width)}  {n}")
-        print(f"  {'-' * width}  {'-' * len(str(sum(counts.values())))}")
-        print(f"  {'TOTAL'.ljust(width)}  {sum(counts.values())}")
+        print("None found.")
+        return
 
-    print(f"{'=' * 40}")
+    width = max(len(e) for e in counts)
+    for employer, n in sorted(counts.items(), key=lambda kv: order.get(kv[0], len(order))):
+        print(f"{employer.ljust(width)}  {n}")
+    print("-" * 11)
+    print(f"Total {sum(counts.values())}")
 
 
 def build_posts(jobs: list[Job], label: str = "KANNAPOLIS") -> list[list[str]]:

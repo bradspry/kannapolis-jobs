@@ -123,15 +123,13 @@ A `--school-bus` run ends with a per-employer tally, so you can see at a glance
 which district is hiring without counting entries in the output files:
 
 ```
-========================================
-  SCHOOL BUS JOBS BY EMPLOYER
-========================================
-  Kannapolis City Schools  5
-  Cabarrus County Schools  23
-  Rowan-Salisbury Schools  13
-  -----------------------  --
-  TOTAL                    41
-========================================
+School Bus Driver Jobs 🚌
+
+Kannapolis City Schools  5
+Cabarrus County Schools  23
+Rowan-Salisbury Schools  13
+-----------
+Total 41
 ```
 
 The tally is printed for `--split` runs too, and reads "None found." when
