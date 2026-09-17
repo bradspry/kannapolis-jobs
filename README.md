@@ -199,6 +199,7 @@ every one of them.
 | Indeed (Remote/Hybrid) | `indeedremote` | jobspy, filtered to remote/hybrid postings | Yes |
 | Kannapolis City Schools | `kcs` | Playwright (AppliTrack/Frontline) | No |
 | Lilly | `lilly` | jobsyn.org search API | No |
+| Lowes Foods | `lowesfoods` | Appcast landing-page API (radius search, filtered to Kannapolis) | No |
 | Macy's | `macys` | Oracle Recruiting Cloud public API (radius search, filtered to China Grove) | Yes |
 | Momentec | `momentec` | Playwright (Paycom) | No |
 | Monarch | `monarch` | Workday CXS public API, filtered to Concord/Kannapolis | Yes |

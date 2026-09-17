@@ -50,9 +50,10 @@ from scrapers.chewy import ChewyScraper
 from scrapers.sysco import SyscoScraper
 from scrapers.macys import MacysScraper
 from scrapers.westrockcoffee import WestrockCoffeeScraper
+from scrapers.lowesfoods import LowesFoodsScraper
 from scrapers.base import Job
 
-ALL_SCRAPERS = [IndeedScraper(), IndeedRemoteScraper(), DHLScraper(), KCSScraper(), CityOfKannapolisScraper(), CFASupplyScraper(), MomentecScraper(), GFSScraper(), ShoeShowScraper(), UNCCScraper(), RCCCScraper(), UNCScraper(), NCStateScraper(), AppStateScraper(), UNCGScraper(), StandardProcessScraper(), LillyScraper(), CabarrusCountyScraper(), CabarrusCountySchoolsScraper(), RowanCountyGovernmentScraper(), RowanCountySchoolsScraper(), SpeedwayMotorsportsScraper(), CabarrusHealthAllianceScraper(), MonarchScraper(), RebelScraper(), CorningScraper(), ChewyScraper(), SyscoScraper(), MacysScraper(), WestrockCoffeeScraper()]
+ALL_SCRAPERS = [IndeedScraper(), IndeedRemoteScraper(), DHLScraper(), KCSScraper(), CityOfKannapolisScraper(), CFASupplyScraper(), MomentecScraper(), GFSScraper(), ShoeShowScraper(), UNCCScraper(), RCCCScraper(), UNCScraper(), NCStateScraper(), AppStateScraper(), UNCGScraper(), StandardProcessScraper(), LillyScraper(), CabarrusCountyScraper(), CabarrusCountySchoolsScraper(), RowanCountyGovernmentScraper(), RowanCountySchoolsScraper(), SpeedwayMotorsportsScraper(), CabarrusHealthAllianceScraper(), MonarchScraper(), RebelScraper(), CorningScraper(), ChewyScraper(), SyscoScraper(), MacysScraper(), WestrockCoffeeScraper(), LowesFoodsScraper()]
 
 MAX_LINES = 99
 SEP  = "=" * 10
