@@ -8,7 +8,7 @@ Usage:
     python run.py warehouse                  # keyword search (modules that support it)
     python run.py --modules dhl              # run a specific module
     python run.py warehouse --modules indeed dhl kcs
-    python run.py --part-time                # only jobs whose title mentions "part time"
+    python run.py --part-time                # only part-time jobs ("part time" or "PT")
     python run.py --title-match "mechanic|automotive|diesel"   # filter titles by regex
 
 Licensed under the GNU General Public License v3.0 — see LICENSE.
@@ -59,7 +59,29 @@ MAX_LINES = 99
 SEP  = "=" * 10
 DASH = "-" * 10
 
-PART_TIME_RE = re.compile(r"part[\s-]*time", re.IGNORECASE)
+# Part-time work, as employers actually write it in a title. Retail and
+# municipal postings frequently use the abbreviation instead of the words
+# ("Deli Clerk PT", "PT LIBRARY PAGE I", "P/T Multilingual Learner Teacher"),
+# which is why the spelled-out form alone is not enough.
+#
+# Both alternatives are anchored at the start and do their work in a lookahead,
+# so the pattern tests the whole title rather than one position in it. That is
+# what lets the abbreviation branch refuse a title that mentions therapy: in
+# healthcare "PT" is a physical therapist, and a lookbehind cannot see the
+# "Physical Therapist" part of "Physical Therapist (PT)" from the "PT" itself.
+# The paired form "PT/OT" is ruled out at the abbreviation itself, since such a
+# title need not mention therapy anywhere ("PT/OT Aide"). A genuinely part-time
+# therapy job is still kept, because spelling out "part time" matches on the
+# first branch regardless.
+#
+# The abbreviation is matched case-sensitively, via the scoped (?-i:) flag:
+# every real use is uppercase, and matching a lowercase "pt" would cost more in
+# false positives than it could gain.
+PART_TIME_RE = re.compile(
+    r"^(?=.*part[\s-]*time)"
+    r"|^(?!.*therap)(?=.*(?<![A-Za-z])(?<!OT/)(?-i:P/?T)(?!/OT)(?![A-Za-z]))",
+    re.IGNORECASE,
+)
 
 # Evening/second-shift work, as employers actually write it in a title.
 # The final alternative catches clock times ("4PM-9PM", "5:00pm"), which the

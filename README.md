@@ -28,7 +28,7 @@ python run.py warehouse                  # keyword search (modules that support 
 python run.py --modules dhl              # run a specific module
 python run.py warehouse --modules indeed dhl kcs
 python run.py --split                    # write a separate file set per source
-python run.py --part-time                # only jobs whose title mentions "part time"
+python run.py --part-time                # only part-time jobs ("part time" or "PT")
 python run.py --evening                  # only evening/PM or second-shift jobs
 python run.py --part-time --evening      # part-time evening work only
 python run.py --school-bus               # school bus jobs across the three districts
@@ -54,10 +54,27 @@ only when the matching flag is used:
 jobs_all_20260821_100948_speedway_parttime_technician_part1.txt
 ```
 
-`--part-time` filters by job title (matching "part time", "part-time", or
-"parttime" in any casing/spacing) after fetching, so it applies uniformly
+`--part-time` filters by job title after fetching, so it applies uniformly
 across every module regardless of whether that module supports a keyword
-filter.
+filter. It matches both the spelled-out form ("part time", "part-time", or
+"parttime" in any casing/spacing) and the uppercase abbreviation employers use
+in its place:
+
+| Matches | Example title |
+|---|---|
+| part time, part-time, parttime, any casing | Part-Time Evening Custodian |
+| a trailing or leading `PT` | Deli Clerk PT, PT LIBRARY PAGE I |
+| `P/T` | P/T Multilingual Learner Teacher |
+
+Grocery, retail and municipal postings abbreviate far more often than they
+spell it out — Lowes Foods writes every title as `... PT` or `... FT`, so
+without the abbreviation the filter returned nothing for that module at all.
+
+The abbreviation is matched case-sensitively and only as a whole word, so
+"Department", "Receipt" and "PTA Coordinator" are untouched. Titles about
+physical therapy are excluded from the abbreviation branch, since "PT" there
+means physical therapist ("Physical Therapist (PT)", "PT/OT Aide"); a therapy
+job that spells out "part time" still matches on the first branch.
 
 `--evening` filters the same way, for work that starts late in the day. It
 matches the forms employers actually use in a title:
