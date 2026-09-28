@@ -1,64 +1,45 @@
-"""Chick-fil-A Supply job listings from their iCIMS career portal.
+"""Chick-fil-A Supply job listings from the Chick-fil-A careers site.
 
-The portal's init script redirects both plain requests and normal headless
-navigation before the job HTML is reachable, so this module intercepts the
-search response in-flight and parses the raw HTML instead of the rendered DOM.
+The careers site (careers.chick-fil-a.com) is a Jibe portal whose search page
+is backed by a plain JSON endpoint, so a location-radius query against
+`/api/jobs` returns the same results as the site's Supply search page. The
+endpoint covers all Chick-fil-A brands, so results are narrowed to those
+tagged "CFA Supply".
 """
 
 import re
 
-from playwright.sync_api import sync_playwright
+import requests
 
 from .base import BaseScraper, Job
 
-LISTING_URL = "https://careers-cfasupply.icims.com/jobs/search?ss=1&searchKeyword=kannapolis&in_iframe=1"
+API_URL = "https://careers.chick-fil-a.com/api/jobs"
+JOB_URL = "https://careers.chick-fil-a.com/supply/jobs/{slug}?lang=en-us"
+
+SEARCH_PARAMS = {
+    "location": "Kannapolis, NC",
+    "woe": "7",
+    "regionCode": "US",
+    "stretchUnit": "MILES",
+    "stretch": "10",
+    "limit": "100",
+}
+
+SUPPLY_TAG = "CFA Supply"
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json",
+}
 
 
 def _clean(text: str) -> str:
     """Collapse whitespace and trim."""
     return re.sub(r"\s+", " ", text or "").strip()
-
-
-def _strip_tags(html: str) -> str:
-    """Remove HTML tags, leaving plain text."""
-    return re.sub(r"<[^>]+>", "", html)
-
-
-def _parse_jobs(html: str) -> list[dict]:
-    """
-    Split on each card opening tag instead of trying to match a closing </li>,
-    which would stop at the first nested </li> inside the card.
-    """
-    jobs = []
-    seen: set[str] = set()
-
-    segments = html.split('<li class="iCIMS_JobCardItem">')
-    for segment in segments[1:]:   # first segment is content before the first card
-        url_m = re.search(
-            r'href="(https://careers-cfasupply\.icims\.com/jobs/\d+/[^"/?]+/job)',
-            segment
-        )
-        if not url_m or url_m.group(1) in seen:
-            continue
-        url = url_m.group(1)
-
-        title_m = re.search(r"<h3[^>]*>(.*?)</h3>", segment, re.DOTALL)
-        title = _clean(_strip_tags(title_m.group(1))) if title_m else ""
-        if not title:
-            continue
-
-        location = "Kannapolis, NC"
-        loc_m = re.search(
-            r"Work Location.*?<dd[^>]*>.*?<span[^>]*>(.*?)</span>",
-            segment, re.DOTALL
-        )
-        if loc_m:
-            location = _clean(_strip_tags(loc_m.group(1)))
-
-        seen.add(url)
-        jobs.append({"title": title, "url": url, "location": location})
-
-    return jobs
 
 
 class CFASupplyScraper(BaseScraper):
@@ -71,61 +52,51 @@ class CFASupplyScraper(BaseScraper):
         return "cfasupply"
 
     def fetch(self, keyword: str = "") -> list[Job]:
-        """Capture the search response's raw HTML via route interception and parse job cards from it."""
-        captured: dict[str, str | None] = {"html": None}
-
-        def intercept(route, request):
-            """Fetch the response ourselves, capture its body, then serve it to the page."""
-            try:
-                response = route.fetch()
-                html = response.body().decode("utf-8", errors="replace")
-                if "iCIMS_JobCardItem" in html and captured["html"] is None:
-                    captured["html"] = html
-                route.fulfill(response=response)
-            except Exception:
-                route.continue_()
+        """Page through the Jibe jobs API for the Kannapolis radius search, keeping CFA Supply jobs."""
+        results: list[Job] = []
+        seen: set[str] = set()
 
         print("  Fetching Chick-fil-A Supply job listings...")
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=["--disable-blink-features=AutomationControlled"],
-            )
-            context = browser.new_context(
-                user_agent=(
-                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/124.0.0.0 Safari/537.36"
-                ),
-                extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
-            )
-            page = context.new_page()
-
-            # Intercept only the iCIMS job-search URL to capture raw HTML
-            page.route("**/jobs/search*in_iframe*", intercept)
-
+        page = 1
+        fetched = 0
+        while True:
             try:
-                page.goto(LISTING_URL, wait_until="commit", timeout=60000)
-            except Exception:
-                pass  # Redirect/abort is expected after HTML is served
+                resp = requests.get(
+                    API_URL, params={**SEARCH_PARAMS, "page": page},
+                    headers=HEADERS, timeout=20,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+            except (requests.RequestException, ValueError) as e:
+                print(f"  Request failed: {e}")
+                break
 
-            browser.close()
+            jobs = data.get("jobs") or []
+            fetched += len(jobs)
+            for entry in jobs:
+                job = entry.get("data") or {}
+                if SUPPLY_TAG not in (job.get("tags1") or []):
+                    continue
+                slug = str(job.get("slug") or job.get("req_id") or "")
+                title = _clean(job.get("title") or "")
+                if not slug or not title or slug in seen:
+                    continue
+                seen.add(slug)
 
-        if not captured["html"]:
-            print("  Could not capture job listing HTML.")
-            return []
+                location = _clean(job.get("full_location") or "") or "Kannapolis, NC"
+                print(f"  {title}  |  {location}")
+                results.append(Job(
+                    title=title,
+                    company="Chick-fil-A Supply",
+                    location=location,
+                    url=JOB_URL.format(slug=slug),
+                    source="Chick-fil-A Supply",
+                ))
 
-        jobs = _parse_jobs(captured["html"])
-        results = []
-        for job in jobs:
-            print(f"  {job['title']}  |  {job['location']}")
-            results.append(Job(
-                title=job["title"],
-                company="Chick-fil-A Supply",
-                location=job["location"],
-                url=job["url"],
-                source="Chick-fil-A Supply",
-            ))
+            total = data.get("totalCount") or 0
+            if not jobs or fetched >= total:
+                break
+            page += 1
 
         print(f"  Found {len(results)} job(s).")
         return results

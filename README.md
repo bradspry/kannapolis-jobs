@@ -207,7 +207,7 @@ every one of them.
 | Cabarrus County Schools | `ccs` | SchoolSpring public jobs API, paginated | Yes |
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
 | Chewy | `chewy` | Phenom People career site, embedded JSON (Salisbury, NC only) | No |
-| Chick-fil-A Supply | `cfasupply` | Playwright (iCIMS, route interception) | No |
+| Chick-fil-A Supply | `cfasupply` | JSON API (Jibe) | No |
 | City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
 | Corning | `corning` | SAP SuccessFactors career site, filtered to Concord, NC | Yes |
 | DHL Careers | `dhl` | Playwright (search + per-job address check) | No |
