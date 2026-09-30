@@ -10,6 +10,7 @@ results to that district, and it honours a keyword, so these modules support
 the CLI keyword argument.
 """
 
+import html
 import re
 from urllib.parse import urlencode
 
@@ -24,11 +25,16 @@ PAGE_SIZE = 100
 STATE_ABBREV = {"north carolina": "NC", "south carolina": "SC", "virginia": "VA"}
 
 
+def _clean(text: str) -> str:
+    """Decode HTML entities (the API sends titles like "K&#x2B; Group Leader"), collapse whitespace and trim."""
+    return re.sub(r"\s+", " ", html.unescape(text or "")).strip()
+
+
 def _short_location(location: str) -> str:
     """Turn "Concord, North Carolina" into "Concord, NC"; leave anything else alone."""
     city, _, state = (location or "").partition(",")
     abbrev = STATE_ABBREV.get(state.strip().lower())
-    return f"{city.strip()}, {abbrev}" if abbrev else re.sub(r"\s+", " ", location or "").strip()
+    return f"{city.strip()}, {abbrev}" if abbrev else location
 
 
 class SchoolSpringScraper(BaseScraper):
@@ -81,13 +87,13 @@ class SchoolSpringScraper(BaseScraper):
 
             for job in jobs:
                 job_id = job.get("jobId")
-                title  = re.sub(r"\s+", " ", job.get("title") or "").strip()
+                title  = _clean(job.get("title"))
                 if not job_id or not title or job_id in seen:
                     continue
                 seen.add(job_id)
 
-                school   = (job.get("employer") or "").strip()
-                city     = _short_location(job.get("location") or "")
+                school   = _clean(job.get("employer"))
+                city     = _short_location(_clean(job.get("location")))
                 location = f"{city} — {school}" if city and school else (city or school)
 
                 print(f"  {title}  |  {location}")
