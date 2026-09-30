@@ -212,6 +212,7 @@ every one of them.
 | City of Kannapolis | `city` | Playwright (GovernmentJobs/NEOGOV) | No |
 | Corning | `corning` | SAP SuccessFactors career site, filtered to Concord, NC | Yes |
 | DHL Careers | `dhl` | Playwright (search + per-job address check) | No |
+| Food Lion | `foodlion` | Job Query API (keyword search, filtered to Kannapolis) | No |
 | Gordon Food Service | `gfs` | Playwright (Workday) | No |
 | Indeed | `indeed` | [jobspy](https://github.com/speedyapply/JobSpy) | Yes |
 | Indeed (Remote/Hybrid) | `indeedremote` | jobspy, filtered to remote/hybrid postings | Yes |
