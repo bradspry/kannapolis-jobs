@@ -203,6 +203,7 @@ every one of them.
 | Source | `--modules` slug | Mechanism | Keyword filter |
 |---|---|---|---|
 | AppState | `appstate` | Atom feed, filtered to Kannapolis-area postings | Yes |
+| Atrium Health | `atrium` | Symphony Talent jobs API (radius search, filtered to Kannapolis) | No |
 | Cabarrus County Government | `cabarrus` | Playwright (GovernmentJobs/NEOGOV, paginated) | No |
 | Cabarrus County Schools | `ccs` | SchoolSpring public jobs API, paginated | Yes |
 | Cabarrus Health Alliance | `cha` | ADP WorkforceNow public API | No |
