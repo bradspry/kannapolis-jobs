@@ -2,7 +2,7 @@
 
 *by Brad Spry, Kannapolitan*
 
-A command-line tool that scrapes job listings from employers, schools, and
+A command-line tool that harvests job listings from employers, schools, and
 government sites in and around Kannapolis, NC, and formats them into
 ready-to-post text files sized for a Facebook post/comment (99 lines each).
 
